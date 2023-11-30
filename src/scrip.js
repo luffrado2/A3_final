@@ -15,11 +15,11 @@ var sceneToRender = null;
 var createDefaultEngine = function () {
     return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, disableWebGL2Support: false });
 };
-
+// Criando a cena
 const createScene = () => {
     const scene = new BABYLON.Scene(engine);
 
-    //Skybox
+    //Skybox - plano de fundo
     const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:150}, scene);
 	  const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
 	  skyboxMaterial.backFaceCulling = false;
@@ -30,14 +30,15 @@ const createScene = () => {
 	  skybox.material = skyboxMaterial;
 
 
-    /**** Set camera and light *****/
+    // Criando a iluminação e a câmera
     const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 15, new BABYLON.Vector3(0, 0, 0));
     camera.attachControl(canvas, true);
     const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0));
 
-    //personagem
+    // Criando o personagem
     BABYLON.SceneLoader.ImportMeshAsync("", "https://assets.babylonjs.com/meshes/", "village.glb");
 
+    // Atribuindo movimentação ao personagem
     const walk = function (turn, dist){
         this.turn = turn;
         this.dist = dist;
@@ -87,7 +88,7 @@ const createScene = () => {
 
     
 
-    // Adicionar a criação do chão da vila
+    // Adicionando o chão da vila
     const groundMat = new BABYLON.StandardMaterial("groundMat");
     groundMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/villagegreen.png");
     groundMat.diffuseTexture.hasAlpha = true;
@@ -95,7 +96,7 @@ const createScene = () => {
     const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 24, height: 24 });
     ground.material = groundMat;
 
-    // Adicionar a criação do terreno grande
+    // Adicionando terreno
     const largeGroundMat = new BABYLON.StandardMaterial("largeGroundMat");
     largeGroundMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/valleygrass.png");
 
@@ -103,6 +104,7 @@ const createScene = () => {
     largeGround.material = largeGroundMat;
     largeGround.position.y = -0.01;
 
+    //Construindo os 2 modelos de casa
     const detached_house = buildHouse(1);
     detached_house.rotation.y = -Math.PI / 16;
     detached_house.position.x = -6.8;
@@ -116,7 +118,7 @@ const createScene = () => {
     const places = []; // Cada entrada é um array [tipo de casa, rotação, x, z]
     places.push([1, -Math.PI / 16, -6.8, 2.5]);
     places.push([2, -Math.PI / 16, -4.5, 3]);
-    // Adicione mais lugares conforme necessário
+    
 
     // Criar instâncias das duas primeiras casas construídas
     const houses = [];
@@ -127,9 +129,10 @@ const createScene = () => {
         houses[i].position.z = places[i][3];
     }
 
+    //Aplicando o som de fundo
     const sound = new BABYLON.Sound('som_de_fundo', '/sound/som.mp3', scene, null, { loop: true, autoplay: true });
 
-    // Carregando o carro
+    // Criando o carro
     BABYLON.SceneLoader.ImportMeshAsync("", "https://assets.babylonjs.com/meshes/", "car.glb").then(() => {
         const car = scene.getMeshByName("car");
         car.rotation = new BABYLON.Vector3(Math.PI / 2, 0, -Math.PI / 2);
@@ -137,6 +140,7 @@ const createScene = () => {
         car.position.x = -3;
         car.position.z = 8;
 
+	// Animando o carro
         const animCar = new BABYLON.Animation("carAnimation", "position.z", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
         const carKeys = [];
@@ -163,7 +167,7 @@ const createScene = () => {
 
         scene.beginAnimation(car, 0, 200, true);
 
-        // Roda animação
+        // Animação da roda
         const wheelRB = scene.getMeshByName("wheelRB");
         const wheelRF = scene.getMeshByName("wheelRF");
         const wheelLB = scene.getMeshByName("wheelLB");
@@ -181,9 +185,9 @@ const createScene = () => {
     return scene;
 }
 
-/****** Funções de Construção ***********/
+//Funções de Construção 
 const buildGround = () => {
-    // Cor
+    
     
     const groundMat = new BABYLON.StandardMaterial("groundMat");
     groundMat.diffuseColor = new BABYLON.Color3(0.07, 0.63, 0.07);
@@ -215,7 +219,7 @@ const buildBox = (width) => {
         boxMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/cubehouse.png");
     }
 
-    // Opções para definir imagens diferentes em cada lado
+    // Aplicando textura nas casas
     const faceUV = [];
     if (width == 2) {
         faceUV[0] = new BABYLON.Vector4(0.6, 0.0, 1.0, 1.0); // Traseira
@@ -228,9 +232,9 @@ const buildBox = (width) => {
         faceUV[2] = new BABYLON.Vector4(0.25, 0, 0.5, 1.0); // Lado direito
         faceUV[3] = new BABYLON.Vector4(0.75, 0, 1.0, 1.0); // Lado esquerdo
     }
-    // Topo 4 e baixo 5 não são visíveis, então não são definidos
+    
 
-    /**** Objetos do Mundo *****/
+   
     const box = BABYLON.MeshBuilder.CreateBox("box", { width: width, faceUV: faceUV, wrap: true });
     box.material = boxMat;
     box.position.y = 0.5;
